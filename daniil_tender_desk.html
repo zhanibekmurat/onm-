@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tender desk — Daniil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#ECEEEA; --card:#F7F8F6; --ink:#131B1A; --steel:#62726F;
+    --line:#D5D9D4; --teal:#0B6E6A; --amber:#9C6B00; --alarm:#A32B22;
+    --shadow:0 1px 2px rgba(19,27,26,.06), 0 4px 16px rgba(19,27,26,.05);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:15px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px 64px}
+
+  header{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--line)}
+  .head-in{max-width:1080px;margin:0 auto;padding:22px 20px 0}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--steel);margin-bottom:4px;
+  }
+  h1{
+    font-family:'Archivo',sans-serif;font-weight:800;font-size:34px;letter-spacing:-.02em;
+    margin:0 0 14px;line-height:1.05;
+  }
+  h1 span{color:var(--steel);font-weight:500}
+
+  .tally{display:flex;gap:26px;flex-wrap:wrap;padding-bottom:18px}
+  .tally div{display:flex;align-items:baseline;gap:7px}
+  .tally b{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:22px;line-height:1}
+  .tally small{font-size:12px;color:var(--steel)}
+  .t-alarm b{color:var(--alarm)} .t-amber b{color:var(--amber)} .t-teal b{color:var(--teal)}
+
+  .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-bottom:16px}
+  .chips{display:flex;border:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--card)}
+  .chip{
+    appearance:none;border:0;background:transparent;cursor:pointer;
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--steel);padding:8px 14px;border-right:1px solid var(--line);
+  }
+  .chip:last-child{border-right:0}
+  .chip[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+  .chip:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+  input[type=search]{
+    flex:1;min-width:170px;font-family:inherit;font-size:14px;color:var(--ink);
+    background:var(--card);border:1px solid var(--line);border-radius:2px;padding:8px 12px;
+  }
+  input[type=search]:focus{outline:2px solid var(--teal);outline-offset:-1px}
+  .ghost{
+    appearance:none;background:transparent;border:1px solid var(--line);border-radius:2px;
+    color:var(--steel);cursor:pointer;padding:8px 12px;text-decoration:none;display:inline-block;
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  }
+  .ghost:hover{border-color:var(--ink);color:var(--ink)}
+  .ghost:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+
+  .list{margin-top:22px;display:flex;flex-direction:column;gap:10px}
+  .row{
+    background:var(--card);border:1px solid var(--line);border-left:3px solid var(--steel);
+    border-radius:2px;box-shadow:var(--shadow);padding:16px 18px;
+    display:grid;grid-template-columns:1fr 108px;gap:4px 20px;align-items:start;
+  }
+  .row.is-late{border-left-color:var(--alarm)}
+  .row.is-soon{border-left-color:var(--amber)}
+  .row.is-ok{border-left-color:var(--teal)}
+  .row.is-done{border-left-color:var(--line);opacity:.72}
+
+  .code{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:15px;letter-spacing:-.01em}
+  .cust{font-size:12px;color:var(--steel);margin-left:9px;font-weight:500}
+  .title{font-size:15px;margin:3px 0 9px;max-width:60ch}
+  .title.empty{color:var(--steel);font-style:italic}
+
+  .meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .tag{
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+    border:1px solid var(--line);border-radius:2px;padding:2px 7px;color:var(--steel);background:var(--paper);
+  }
+  .tag.solid{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .tag.share{border-color:var(--teal);color:var(--teal)}
+
+  .count{text-align:right;grid-row:span 3}
+  .days{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:30px;line-height:1;letter-spacing:-.03em;display:block}
+  .days.late{color:var(--alarm)} .days.soon{color:var(--amber)} .days.ok{color:var(--teal)}
+  .days.none{font-size:15px;color:var(--steel)}
+  .days-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--steel);display:block;margin-top:5px}
+
+  .runway{grid-column:1 / -1;margin-top:12px}
+  .track{position:relative;height:3px;background:var(--line);border-radius:2px}
+  .fill{position:absolute;left:0;top:0;bottom:0;background:var(--steel);border-radius:2px}
+  .row.is-late .fill{background:var(--alarm)}
+  .row.is-soon .fill{background:var(--amber)}
+  .row.is-ok   .fill{background:var(--teal)}
+  .pin{position:absolute;top:-3px;width:1px;height:9px;background:var(--ink)}
+  .ends{display:flex;justify-content:space-between;margin-top:5px;
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--steel)}
+
+  .note{grid-column:1 / -1;margin-top:11px;padding-top:10px;border-top:1px dashed var(--line);
+    font-size:13px;color:var(--steel);white-space:pre-line}
+
+  .state{padding:56px 0;text-align:center;color:var(--steel)}
+  .state b{display:block;font-family:'Archivo',sans-serif;font-weight:700;font-size:19px;color:var(--ink);margin-bottom:6px}
+
+  footer{margin-top:26px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--steel);
+    display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+  .row{cursor:pointer}
+  .row:hover{border-color:var(--ink)}
+  .row:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+
+  /* ---------- детальная панель ---------- */
+  .veil{
+    position:fixed;inset:0;background:rgba(19,27,26,.45);z-index:40;
+    display:flex;justify-content:flex-end;
+  }
+  .veil[hidden]{display:none}
+  .panel{
+    width:min(560px,100%);height:100%;background:var(--paper);overflow-y:auto;
+    box-shadow:-8px 0 24px rgba(19,27,26,.12);
+  }
+  .panel-head{
+    position:sticky;top:0;background:var(--paper);border-bottom:1px solid var(--line);
+    padding:20px 24px 16px;z-index:1;
+  }
+  .panel-close{
+    appearance:none;background:transparent;border:1px solid var(--line);border-radius:2px;
+    color:var(--steel);cursor:pointer;padding:6px 10px;font-family:'IBM Plex Mono',monospace;
+    font-size:11px;letter-spacing:.1em;text-transform:uppercase;float:right;
+  }
+  .panel-close:hover{border-color:var(--ink);color:var(--ink)}
+  .panel-code{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:20px}
+  .panel-cust{font-size:13px;color:var(--steel);margin-top:3px}
+  .panel-title{font-size:16px;margin:10px 0 0;max-width:56ch}
+
+  .panel-body{padding:20px 24px 40px}
+  .kv-group{margin-bottom:22px}
+  .kv-group-title{
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--steel);margin:0 0 8px;
+  }
+  .kv{
+    display:grid;grid-template-columns:150px 1fr;gap:2px 14px;
+    border-top:1px solid var(--line);
+  }
+  .kv-row{display:contents}
+  .kv-row dt{
+    padding:9px 0;font-size:12.5px;color:var(--steel);border-bottom:1px solid var(--line);
+  }
+  .kv-row dd{
+    margin:0;padding:9px 0;font-size:13.5px;border-bottom:1px solid var(--line);
+    white-space:pre-line;word-break:break-word;
+  }
+  @media (max-width:620px){
+    .kv{grid-template-columns:120px 1fr}
+    .panel{width:100%}
+  }
+
+  @media (max-width:620px){
+    h1{font-size:26px}
+    .row{grid-template-columns:1fr;gap:2px}
+    .count{text-align:left;grid-row:auto;margin-top:10px;display:flex;align-items:baseline;gap:8px}
+    .days{font-size:24px} .days-lbl{margin-top:0}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-in">
+    <div class="eyebrow">ONM · RFQ and PO</div>
+    <h1>Тендеры Daniil <span id="scope">— в работе</span></h1>
+    <div class="tally" id="tally"></div>
+    <div class="controls">
+      <div class="chips" role="group" aria-label="Фильтр по статусу">
+        <button class="chip" id="f-open" aria-pressed="true">В работе</button>
+        <button class="chip" id="f-all" aria-pressed="false">Все</button>
+      </div>
+      <input type="search" id="q" placeholder="Поиск по номеру, заказчику, позиции" aria-label="Поиск">
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="list" id="list"></div>
+  <div class="state" id="state" style="display:none"></div>
+  <footer>
+    <span id="stamp"></span>
+    <span>Buyer содержит Danil / Daniil · данные обновлены вручную</span>
+  </footer>
+</div>
+
+<div class="veil" id="veil" hidden>
+  <div class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-code"></div>
+</div>
+
+<script>
+// ---------- данные ----------
+// Обновление: замените массив ниже на новую выгрузку и пересохраните файл.
+var DATA = [{"num": "272", "customer": "ERG", "rfq": "ERFQ26007", "pr": "", "category": "Поставка подшипников рамочный контракт", "buyer": "Baltabek, Daniil", "status": "MR", "openClosed": "Open", "result": "Market research", "rcvDate": "2026-04-10", "dueDate": "", "mrRcvDate": "", "mrDueDate": "", "comment": "12-06: NB need to clarify!\n04-05: EN pending approval by Yusuf\n10-04: MR received", "contractValue": "", "bidValue": "", "poNumber": "", "full": [["#", "272"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26007"], ["Category", "Поставка подшипников рамочный контракт"], ["Buyer", "Baltabek, Daniil"], ["Short Status", "MR"], ["Open / Closed", "Open"], ["Result", "Market research"], ["Ten Rcv Date", "2026-04-10"], ["Comments (Internal Notes)", "12-06: NB need to clarify!\n04-05: EN pending approval by Yusuf\n10-04: MR received"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "280", "customer": "ERG", "rfq": "ERFQ26012", "pr": "", "category": "Запорная арматура", "buyer": "Danil", "status": "Unquoted", "openClosed": "Closed", "result": "Market research", "rcvDate": "2026-04-16", "dueDate": "2026-04-23", "mrRcvDate": "", "mrDueDate": "", "comment": "16-04: RFQ received", "contractValue": "", "bidValue": "", "poNumber": "", "full": [["#", "280"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26012"], ["Category", "Запорная арматура"], ["Buyer", "Danil"], ["Short Status", "Unquoted"], ["Open / Closed", "Closed"], ["Result", "Market research"], ["Ten Rcv Date", "2026-04-16"], ["Ten Due Date", "2026-04-23"], ["Comments (Internal Notes)", "16-04: RFQ received"]]}, {"num": "281", "customer": "ERG", "rfq": "ERFQ26013", "pr": "", "category": "Компрессор на шасси", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-16", "dueDate": "2026-04-16", "mrRcvDate": "", "mrDueDate": "", "comment": "17-04: EN sent offer\n16-04: RFQ received", "contractValue": "", "bidValue": "34550", "poNumber": "", "full": [["#", "281"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26013"], ["Category", "Компрессор на шасси"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-16"], ["Ten Due Date", "2026-04-16"], ["Comments (Internal Notes)", "17-04: EN sent offer\n16-04: RFQ received"], ["COST Value", "23345"], ["BID Value in USD", "34550"]]}, {"num": "293", "customer": "ERG", "rfq": "ERFQ26022", "pr": "", "category": "запорная арматуры по ЗРА", "buyer": "Danil", "status": "MR", "openClosed": "Closed", "result": "Market research", "rcvDate": "2026-04-20", "dueDate": "2026-04-29", "mrRcvDate": "", "mrDueDate": "", "comment": "12-06: NB no answer from Daniil\n28-04: EN submitted\n25-04: EN asked extension\n20-04: GS RFQ received", "contractValue": "", "bidValue": "0", "poNumber": "", "full": [["#", "293"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26022"], ["Category", "запорная арматуры по ЗРА"], ["Buyer", "Danil"], ["Short Status", "MR"], ["Open / Closed", "Closed"], ["Result", "Market research"], ["Ten Rcv Date", "2026-04-20"], ["Ten Due Date", "2026-04-29"], ["Comments (Internal Notes)", "12-06: NB no answer from Daniil\n28-04: EN submitted\n25-04: EN asked extension\n20-04: GS RFQ received"], ["Quoted Items", "0"], ["Total Items", "74"], ["% Items Quoted", "0"], ["BID Value in USD", "0"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "285", "customer": "ERG", "rfq": "ERFQ26014", "pr": "T/18824/16/04/26", "category": "Запорная арматура", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-17", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "27-04: EN submitted\n25-04: EN asked extension\n16-04: GS RFQ received", "contractValue": "", "bidValue": "", "poNumber": "", "full": [["#", "285"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26014"], ["Customer PR/RFQ", "T/18824/16/04/26"], ["Category", "Запорная арматура"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-17"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "27-04: EN submitted\n25-04: EN asked extension\n16-04: GS RFQ received"], ["Quoted Items", "0"], ["Total Items", "66"], ["% Items Quoted", "0"], ["COST Value", "70497"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "313", "customer": "ERG", "rfq": "ERFQ26028", "pr": "S/02813/23/04/26", "category": "запорная арматура по прочая", "buyer": "Danil", "status": "Contract Draft", "openClosed": "Open", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-28", "mrRcvDate": "", "mrDueDate": "", "comment": "12-06: NB send quotation to ERG Dmitriy.\n21-05 US: contract draft 80k KZT\n06-05: GS нет ML и BID\n28-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "0", "poNumber": "", "full": [["#", "313"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26028"], ["Customer PR/RFQ", "S/02813/23/04/26"], ["Priority", "Critical"], ["Category", "запорная арматура по прочая"], ["Buyer", "Danil"], ["Short Status", "Contract Draft"], ["Open / Closed", "Open"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-28"], ["Days Left", "-101"], ["Comments (Internal Notes)", "12-06: NB send quotation to ERG Dmitriy.\n21-05 US: contract draft 80k KZT\n06-05: GS нет ML и BID\n28-04: EN submitted\n27-04: GS RFQ received"], ["BID Value in USD", "0"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "312", "customer": "ERG", "rfq": "ERFQ26027", "pr": "T/20131/24/04/26", "category": "запорная арматура стальная", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-29", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n29-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "0", "poNumber": "", "full": [["#", "312"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26027"], ["Customer PR/RFQ", "T/20131/24/04/26"], ["Category", "запорная арматура стальная"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-29"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n29-04: EN submitted\n27-04: GS RFQ received"], ["BID Value in USD", "0"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "314", "customer": "ERG", "rfq": "ERFQ26029", "pr": "T/18857/16/04/26", "category": "арматура высокого давления", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "0", "poNumber": "", "full": [["#", "314"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26029"], ["Customer PR/RFQ", "T/18857/16/04/26"], ["Category", "арматура высокого давления"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received"], ["BID Value in USD", "0"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "315", "customer": "ERG", "rfq": "ERFQ26030", "pr": "T/18856/16/04/26", "category": "запорная арматура стальная", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN late to submit a price offer\n27-04: GS RFQ received", "contractValue": "", "bidValue": "0", "poNumber": "", "full": [["#", "315"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26030"], ["Customer PR/RFQ", "T/18856/16/04/26"], ["Category", "запорная арматура стальная"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN late to submit a price offer\n27-04: GS RFQ received"], ["BID Value in USD", "0"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "316", "customer": "ERG", "rfq": "ERFQ26031", "pr": "T/18854/16/04/26", "category": "запорная арматура стальная", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN late to submit a price offer\n27-04: GS RFQ received", "contractValue": "", "bidValue": "0", "poNumber": "", "full": [["#", "316"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26031"], ["Customer PR/RFQ", "T/18854/16/04/26"], ["Category", "запорная арматура стальная"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN late to submit a price offer\n27-04: GS RFQ received"], ["BID Value in USD", "0"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "317", "customer": "ERG", "rfq": "ERFQ26032", "pr": "T/18846/16/04/26", "category": "запорная арматура импортная", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "0", "poNumber": "", "full": [["#", "317"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26032"], ["Customer PR/RFQ", "T/18846/16/04/26"], ["Category", "запорная арматура импортная"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received"], ["BID Value in USD", "0"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "318", "customer": "ERG", "rfq": "ERFQ26033", "pr": "T/18844/16/04/26", "category": "арматура высокого давления", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "0", "poNumber": "", "full": [["#", "318"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26033"], ["Customer PR/RFQ", "T/18844/16/04/26"], ["Category", "арматура высокого давления"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received"], ["BID Value in USD", "0"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "319", "customer": "ERG", "rfq": "ERFQ26034", "pr": "T/18826/16/04/26", "category": "запорная арматура стальная", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "0", "poNumber": "", "full": [["#", "319"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26034"], ["Customer PR/RFQ", "T/18826/16/04/26"], ["Category", "запорная арматура стальная"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received"], ["BID Value in USD", "0"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "320", "customer": "ERG", "rfq": "ERFQ26035", "pr": "T/18824/16/04/26", "category": "запорная арматура стальная", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "48324.09", "poNumber": "", "full": [["#", "320"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26035"], ["Customer PR/RFQ", "T/18824/16/04/26"], ["Category", "запорная арматура стальная"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received"], ["COST Value", "24162.04"], ["BID Value in USD", "48324.09"], ["RFx", "T/18824/16/04/26"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "321", "customer": "ERG", "rfq": "ERFQ26036", "pr": "T/18819/16/04/26", "category": "запорная арматура чугунная", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "164343.4", "poNumber": "", "full": [["#", "321"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26036"], ["Customer PR/RFQ", "T/18819/16/04/26"], ["Category", "запорная арматура чугунная"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received"], ["Quoted Items", "104"], ["Total Items", "104"], ["% Items Quoted", "1"], ["COST Value", "82171.7"], ["BID Value in USD", "164343.4"], ["RFx", "T/18819/16/04/26"], ["KPO Manager - Contact", "Қайырдұлда Рахат Rakhat.Kaiyrdulda@erg.kz"], ["Tel", ".+7 701 7650027"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "322", "customer": "ERG", "rfq": "ERFQ26037", "pr": "T/18804/16/04/26", "category": "запорная арматура стальная", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "187474.89", "poNumber": "", "full": [["#", "322"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26037"], ["Customer PR/RFQ", "T/18804/16/04/26"], ["Category", "запорная арматура стальная"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received"], ["Quoted Items", "86"], ["Total Items", "97"], ["% Items Quoted", "0.89"], ["COST Value", "93737.45"], ["BID Value in USD", "187474.89"], ["RFx", "T/18804/16/04/26"], ["KPO Manager - Contact", "Қайырдұлда Рахат Rakhat.Kaiyrdulda@erg.kz"], ["Tel", ".+7 701 7650027"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "323", "customer": "ERG", "rfq": "ERFQ26038", "pr": "T/18781/16/04/26", "category": "запорная арматура стальная", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "163058.11", "poNumber": "", "full": [["#", "323"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26038"], ["Customer PR/RFQ", "T/18781/16/04/26"], ["Category", "запорная арматура стальная"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received"], ["Quoted Items", "90"], ["Total Items", "93"], ["% Items Quoted", "0.97"], ["COST Value", "81529.05"], ["BID Value in USD", "163058.11"], ["RFx", "T/18781/16/04/26"], ["KPO Manager - Contact", "Қайырдұлда Рахат Rakhat.Kaiyrdulda@erg.kz"], ["Tel", ".+7 701 7650027"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "324", "customer": "ERG", "rfq": "ERFQ26039", "pr": "T/18778/16/04/26", "category": "запорная арматура импортная", "buyer": "Danil", "status": "Unquoted", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN late to submit a price offer\n27-04: GS RFQ received", "contractValue": "", "bidValue": "0", "poNumber": "", "full": [["#", "324"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26039"], ["Customer PR/RFQ", "T/18778/16/04/26"], ["Category", "запорная арматура импортная"], ["Buyer", "Danil"], ["Short Status", "Unquoted"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN late to submit a price offer\n27-04: GS RFQ received"], ["Quoted Items", "0"], ["Total Items", "12"], ["% Items Quoted", "0"], ["BID Value in USD", "0"], ["RFx", "T/18778/16/04/26"], ["KPO Manager - Contact", "Қайырдұлда Рахат Rakhat.Kaiyrdulda@erg.kz"], ["Tel", ".+7 701 7650027"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "325", "customer": "ERG", "rfq": "ERFQ26040", "pr": "T/18776/16/04/26", "category": "запорная арматура стальная", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "27-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "429083", "poNumber": "", "full": [["#", "325"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26040"], ["Customer PR/RFQ", "T/18776/16/04/26"], ["Category", "запорная арматура стальная"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "27-04: EN submitted\n27-04: GS RFQ received"], ["Quoted Items", "59"], ["Total Items", "59"], ["% Items Quoted", "1"], ["COST Value", "214541.5"], ["BID Value in USD", "429083"], ["RFx", "T/18776/16/04/26"], ["KPO Manager - Contact", "Қайырдұлда Рахат Rakhat.Kaiyrdulda@erg.kz"], ["Tel", ".+7 701 7650027"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "401", "customer": "KPO", "rfq": "KRFQ1284-49", "pr": "7200009820", "category": "", "buyer": "Amir, Baltabek, Daniil, Aida, Nursultan", "status": "E-BID", "openClosed": "Closed", "result": "Processing E-BID", "rcvDate": "2026-07-24", "dueDate": "2026-07-30", "mrRcvDate": "", "mrDueDate": "", "comment": "24-07: NB RFQ recived", "contractValue": "", "bidValue": "", "poNumber": "", "full": [["#", "401"], ["Customer", "KPO"], ["ONM RFQ", "KRFQ1284-49"], ["Customer PR/RFQ", "7200009820"], ["Priority", "Critical"], ["Buyer", "Amir, Baltabek, Daniil, Aida, Nursultan"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Processing E-BID"], ["Ten Rcv Date", "2026-07-24"], ["Ten Due Date", "2026-07-30"], ["Comments (Internal Notes)", "24-07: NB RFQ recived"], ["P2", "STD"]]}, {"num": "407", "customer": "KPO", "rfq": "KRFQ26055", "pr": "KM Group - 26/0416", "category": "", "buyer": "Baltabek, Daniil", "status": "E-BID", "openClosed": "Open", "result": "Processing E-BID", "rcvDate": "2026-08-03", "dueDate": "2026-08-14", "mrRcvDate": "", "mrDueDate": "", "comment": "03-08: GS RFQ recived", "contractValue": "", "bidValue": "", "poNumber": "", "full": [["#", "407"], ["Customer", "KPO"], ["ONM RFQ", "KRFQ26055"], ["Customer PR/RFQ", "KM Group - 26/0416"], ["Buyer", "Baltabek, Daniil"], ["Short Status", "E-BID"], ["Open / Closed", "Open"], ["Result", "Processing E-BID"], ["Ten Rcv Date", "2026-08-03"], ["Ten Due Date", "2026-08-14"], ["Days Left", "7"], ["Comments (Internal Notes)", "03-08: GS RFQ recived"], ["Quoted Items", "0"], ["Total Items", "120"], ["% Items Quoted", "0"]]}, {"num": "408", "customer": "Zhaikmunai LLP", "rfq": "ZRFQ26002", "pr": "2090063", "category": "Задвижка", "buyer": "Daniil", "status": "E-BID", "openClosed": "Open", "result": "Processing E-BID", "rcvDate": "2026-08-06", "dueDate": "2026-08-11", "mrRcvDate": "", "mrDueDate": "", "comment": "06-08:  GS RFQ recived 12,00", "contractValue": "", "bidValue": "", "poNumber": "", "full": [["#", "408"], ["Customer", "Zhaikmunai LLP"], ["ONM RFQ", "ZRFQ26002"], ["Customer PR/RFQ", "2090063"], ["Category", "Задвижка"], ["Buyer", "Daniil"], ["Short Status", "E-BID"], ["Open / Closed", "Open"], ["Result", "Processing E-BID"], ["Ten Rcv Date", "2026-08-06"], ["Ten Due Date", "2026-08-11"], ["Days Left", "4"], ["Comments (Internal Notes)", "06-08:  GS RFQ recived 12,00"], ["Quoted Items", "0"], ["Total Items", "1"], ["% Items Quoted", "0"]]}, {"num": "409", "customer": "Zhaikmunai LLP", "rfq": "ZRFQ26003", "pr": "2089942", "category": "Подшипники SKF, и сервис наборов Atlas Copco", "buyer": "Daniil", "status": "E-BID", "openClosed": "Open", "result": "Processing E-BID", "rcvDate": "2026-08-07", "dueDate": "2026-08-11", "mrRcvDate": "", "mrDueDate": "", "comment": "07-08:  GS RFQ recived 13,00", "contractValue": "", "bidValue": "", "poNumber": "", "full": [["#", "409"], ["Customer", "Zhaikmunai LLP"], ["ONM RFQ", "ZRFQ26003"], ["Customer PR/RFQ", "2089942"], ["Category", "Подшипники SKF, и сервис наборов Atlas Copco"], ["Buyer", "Daniil"], ["Short Status", "E-BID"], ["Open / Closed", "Open"], ["Result", "Processing E-BID"], ["Ten Rcv Date", "2026-08-07"], ["Ten Due Date", "2026-08-11"], ["Comments (Internal Notes)", "07-08:  GS RFQ recived 13,00"], ["Quoted Items", "1"], ["Total Items", "20"], ["% Items Quoted", "0.05"]]}];
+
+var MODE = 'open', DAY = 86400000;
+
+function parseDate(s){
+  if(!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+  var p = s.split('-');
+  return new Date(+p[0], +p[1]-1, +p[2]);
+}
+function today0(){ var d = new Date(); d.setHours(0,0,0,0); return d; }
+function daysLeft(r){
+  var d = parseDate(r.dueDate) || parseDate(r.mrDueDate);
+  return d ? Math.round((d - today0()) / DAY) : null;
+}
+function isOpen(r){ return String(r.openClosed).trim().toLowerCase() === 'open'; }
+function tone(r){
+  if(!isOpen(r)) return 'done';
+  var d = daysLeft(r);
+  if(d === null) return 'ok';
+  if(d < 0) return 'late';
+  if(d <= 7) return 'soon';
+  return 'ok';
+}
+function fmt(s){
+  var d = parseDate(s);
+  if(!d) return '—';
+  return ('0'+d.getDate()).slice(-2) + '.' + ('0'+(d.getMonth()+1)).slice(-2) + '.' + d.getFullYear();
+}
+function escapeHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+function plural(n, a, b, c){
+  var m = Math.abs(n) % 100, k = m % 10;
+  if(m > 10 && m < 20) return c;
+  if(k > 1 && k < 5) return b;
+  if(k === 1) return a;
+  return c;
+}
+
+function render(){
+  var q = document.getElementById('q').value.trim().toLowerCase();
+  var rows = DATA.map(function(r, i){ return {r:r, i:i}; }).filter(function(x){
+    var r = x.r;
+    if(MODE === 'open' && !isOpen(r)) return false;
+    if(!q) return true;
+    return [r.rfq, r.customer, r.category, r.pr, r.status, r.result, r.num]
+      .join(' ').toLowerCase().indexOf(q) > -1;
+  });
+
+  rows.sort(function(x,y){
+    var a = x.r, b = y.r;
+    var oa = isOpen(a) ? 0 : 1, ob = isOpen(b) ? 0 : 1;
+    if(oa !== ob) return oa - ob;
+    var da = daysLeft(a), db = daysLeft(b);
+    if(da === null && db === null) return 0;
+    if(da === null) return 1;
+    if(db === null) return -1;
+    return da - db;
+  });
+
+  var open = DATA.filter(isOpen);
+  var late = open.filter(function(r){ var d = daysLeft(r); return d !== null && d < 0; }).length;
+  var soon = open.filter(function(r){ var d = daysLeft(r); return d !== null && d >= 0 && d <= 7; }).length;
+  document.getElementById('tally').innerHTML =
+    tile('t-teal', open.length, plural(open.length,'тендер','тендера','тендеров') + ' в работе') +
+    tile('t-amber', soon, 'срок в ближайшую неделю') +
+    tile('t-alarm', late, plural(late,'срок просрочен','срока просрочено','сроков просрочено')) +
+    tile('', DATA.length, 'всего за всё время');
+
+  document.getElementById('scope').textContent = MODE === 'open' ? '— в работе' : '— все';
+
+  var list = document.getElementById('list');
+  var state = document.getElementById('state');
+
+  if(!rows.length){
+    list.innerHTML = '';
+    state.style.display = 'block';
+    state.innerHTML = q
+      ? '<b>Ничего не нашлось</b>Попробуйте другой номер RFQ или заказчика'
+      : '<b>Открытых тендеров нет</b>Переключитесь на «Все», чтобы увидеть закрытые';
+    return;
+  }
+  state.style.display = 'none';
+  list.innerHTML = rows.map(function(x){ return card(x.r, x.i); }).join('');
+}
+
+function tile(cls, n, label){
+  return '<div class="' + cls + '"><b>' + n + '</b><small>' + label + '</small></div>';
+}
+
+function card(r, idx){
+  var t = tone(r), d = daysLeft(r);
+  var num, lbl;
+  if(d === null){ num = '<span class="days none">без срока</span>'; lbl = ''; }
+  else {
+    num = '<span class="days ' + t + '">' + (d < 0 ? d : '+' + d) + '</span>';
+    lbl = '<span class="days-lbl">' + (d < 0 ? 'просрочен' : plural(d,'день','дня','дней')) + '</span>';
+  }
+
+  var tags = [];
+  if(r.status) tags.push('<span class="tag solid">' + escapeHtml(r.status) + '</span>');
+  if(r.result) tags.push('<span class="tag">' + escapeHtml(r.result) + '</span>');
+  if(/[,\/;]/.test(r.buyer)) tags.push('<span class="tag share">с ' +
+    escapeHtml(r.buyer.split(/[,\/;]/).map(function(s){return s.trim()})
+      .filter(function(s){ return !/^dani?il$/i.test(s) && s; }).join(', ')) + '</span>');
+  if(r.pr) tags.push('<span class="tag">' + escapeHtml(r.pr) + '</span>');
+  if(r.bidValue && +r.bidValue > 0)
+    tags.push('<span class="tag">BID ' + Math.round(+r.bidValue).toLocaleString('ru-RU') + ' $</span>');
+
+  var last = String(r.comment || '').split('\n')[0].trim();
+
+  return '<article class="row is-' + t + '" tabindex="0" role="button" ' +
+    'aria-label="Открыть детали ' + escapeHtml(r.rfq || '') + '" data-idx="' + idx + '">' +
+    '<div>' +
+      '<span class="code">' + escapeHtml(r.rfq || '—') + '</span>' +
+      '<span class="cust">' + escapeHtml(r.customer) + '</span>' +
+      '<div class="title' + (r.category ? '' : ' empty') + '">' +
+        escapeHtml(r.category || 'позиция не указана') + '</div>' +
+      '<div class="meta">' + tags.join('') + '</div>' +
+    '</div>' +
+    '<div class="count">' + num + lbl + '</div>' +
+    runway(r) +
+    (last ? '<div class="note">' + escapeHtml(last) + '</div>' : '') +
+  '</article>';
+}
+
+// ---------- детальная панель ----------
+// группировка полей исходной таблицы по смыслу для читаемого вида
+var FIELD_GROUPS = [
+  ['Заявка', ['#','Customer','ONM RFQ','Customer PR/RFQ','Category','Priority','TA','PR (Yes / No)','Buyer']],
+  ['Статус', ['Short Status','Open / Closed','Result','Days Left','Номер События','RFx']],
+  ['Тендер', ['Ten Rcv Date','Ten Due Date','Clar Rcv Date','Clar Due Date','No','Validity Days','Expiration Date']],
+  ['Маркет-ресёрч', ['MR Rcv Date','MR Due Date','Acknow MR']],
+  ['Контракт', ['Contract Signed Date','Contract end date','Lost/Cancelled Date','Contract Quoted Items','Есть цены']],
+  ['Позиции и цены', ['Quoted Items','Total Items','% Items Quoted','Datasheets','TB']],
+  ['Суммы', ['Contract Value','COST Value','BID Value in USD']],
+  ['Документы', ['Customer PO/Contract No','ONM PO No','Acknow ITT','Rcv Date']],
+  ['Контакты KPO', ['KPO Manager','KPO Manager - Contact','Tel']],
+  ['Участники', ['P1','P2','P3','P4','P5','P6','P7','P8']],
+];
+
+function openDetail(idx){
+  var r = DATA[idx];
+  if(!r) return;
+  var map = {};
+  (r.full || []).forEach(function(pair){ map[pair[0]] = pair[1]; });
+  var used = {};
+
+  var groupsHtml = FIELD_GROUPS.map(function(g){
+    var rows = g[1].filter(function(k){ return map[k] !== undefined; });
+    if(!rows.length) return '';
+    rows.forEach(function(k){ used[k] = true; });
+    return '<div class="kv-group"><div class="kv-group-title">' + escapeHtml(g[0]) + '</div>' +
+      '<dl class="kv">' + rows.map(function(k){
+        return '<div class="kv-row"><dt>' + escapeHtml(k) + '</dt><dd>' + escapeHtml(map[k]) + '</dd></div>';
+      }).join('') + '</dl></div>';
+  }).join('');
+
+  var leftover = Object.keys(map).filter(function(k){ return !used[k]; });
+  if(leftover.length){
+    groupsHtml += '<div class="kv-group"><div class="kv-group-title">Прочее</div><dl class="kv">' +
+      leftover.map(function(k){
+        return '<div class="kv-row"><dt>' + escapeHtml(k) + '</dt><dd>' + escapeHtml(map[k]) + '</dd></div>';
+      }).join('') + '</dl></div>';
+  }
+
+  document.getElementById('panel').innerHTML =
+    '<div class="panel-head">' +
+      '<button class="panel-close" id="panel-close">Закрыть</button>' +
+      '<div class="panel-code" id="panel-code">' + escapeHtml(r.rfq || 'Без номера') + '</div>' +
+      '<div class="panel-cust">' + escapeHtml(r.customer || '') + '</div>' +
+      (r.category ? '<div class="panel-title">' + escapeHtml(r.category) + '</div>' : '') +
+    '</div>' +
+    '<div class="panel-body">' + groupsHtml + '</div>';
+
+  document.getElementById('veil').hidden = false;
+  document.getElementById('panel-close').onclick = closeDetail;
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail(){
+  document.getElementById('veil').hidden = true;
+  document.body.style.overflow = '';
+}
+
+document.getElementById('veil').addEventListener('click', function(e){
+  if(e.target.id === 'veil') closeDetail();
+});
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') closeDetail();
+});
+document.getElementById('list').addEventListener('click', function(e){
+  var row = e.target.closest('.row');
+  if(row) openDetail(+row.dataset.idx);
+});
+document.getElementById('list').addEventListener('keydown', function(e){
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  var row = e.target.closest('.row');
+  if(row){ e.preventDefault(); openDetail(+row.dataset.idx); }
+});
+
+function runway(r){
+  var a = parseDate(r.rcvDate) || parseDate(r.mrRcvDate);
+  var b = parseDate(r.dueDate) || parseDate(r.mrDueDate);
+  if(!a || !b || b <= a) return '';
+  var now = today0();
+  var pct = Math.max(0, Math.min(100, (now - a) / (b - a) * 100));
+  return '<div class="runway">' +
+    '<div class="track"><div class="fill" style="width:' + pct.toFixed(1) + '%"></div>' +
+      '<div class="pin" style="left:' + pct.toFixed(1) + '%"></div></div>' +
+    '<div class="ends"><span>получен ' + fmt(r.rcvDate || r.mrRcvDate) + '</span>' +
+      '<span>срок ' + fmt(r.dueDate || r.mrDueDate) + '</span></div>' +
+  '</div>';
+}
+
+document.getElementById('f-open').onclick = function(){ setMode('open'); };
+document.getElementById('f-all').onclick  = function(){ setMode('all'); };
+function setMode(m){
+  MODE = m;
+  document.getElementById('f-open').setAttribute('aria-pressed', m === 'open');
+  document.getElementById('f-all').setAttribute('aria-pressed', m === 'all');
+  render();
+}
+document.getElementById('q').oninput = render;
+
+document.getElementById('stamp').textContent =
+  'Данные по состоянию на ' + new Date().toLocaleDateString('ru-RU');
+render();
+</script>
+</body>
+</html>
