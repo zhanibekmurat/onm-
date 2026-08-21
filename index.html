@@ -1,439 +1,649 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tender desk — Daniil</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<title>NCOC — Supply Chain Org Chart</title>
 <style>
-  :root{
-    --paper:#ECEEEA; --card:#F7F8F6; --ink:#131B1A; --steel:#62726F;
-    --line:#D5D9D4; --teal:#0B6E6A; --amber:#9C6B00; --alarm:#A32B22;
-    --shadow:0 1px 2px rgba(19,27,26,.06), 0 4px 16px rgba(19,27,26,.05);
+:root{
+  --bg:#f6f5f2;
+  --surface:#ffffff;
+  --border:#dfdcd3;
+  --text:#232220;
+  --text-dim:#6b6862;
+  --accent:#1f5c4d;
+  --accent-soft:#e4efe9;
+  --mono-bg:#eeece5;
+  --avatar-bg:#d8d4c8;
+  --line:#c7c3b6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#171714;
+    --surface:#232320;
+    --border:#3b3a34;
+    --text:#ecebe6;
+    --text-dim:#a5a29a;
+    --accent:#6fbfa4;
+    --accent-soft:#233029;
+    --mono-bg:#2a2a25;
+    --avatar-bg:#3a392f;
+    --line:#454439;
   }
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{
-    background:var(--paper); color:var(--ink);
-    font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:15px; line-height:1.5;
-    -webkit-font-smoothing:antialiased;
-  }
-  .wrap{max-width:1080px;margin:0 auto;padding:0 20px 64px}
+}
+:root[data-theme="dark"]{
+  --bg:#171714;
+  --surface:#232320;
+  --border:#3b3a34;
+  --text:#ecebe6;
+  --text-dim:#a5a29a;
+  --accent:#6fbfa4;
+  --accent-soft:#233029;
+  --mono-bg:#2a2a25;
+  --avatar-bg:#3a392f;
+  --line:#454439;
+}
 
-  header{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--line)}
-  .head-in{max-width:1080px;margin:0 auto;padding:22px 20px 0}
-  .eyebrow{
-    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;
-    text-transform:uppercase;color:var(--steel);margin-bottom:4px;
-  }
-  h1{
-    font-family:'Archivo',sans-serif;font-weight:800;font-size:34px;letter-spacing:-.02em;
-    margin:0 0 14px;line-height:1.05;
-  }
-  h1 span{color:var(--steel);font-weight:500}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Segoe UI', Arial, sans-serif;
+  line-height:1.4;
+  padding:2rem 1.5rem 4rem;
+}
+.wrap{max-width:1180px;margin:0 auto;}
 
-  .tally{display:flex;gap:26px;flex-wrap:wrap;padding-bottom:18px}
-  .tally div{display:flex;align-items:baseline;gap:7px}
-  .tally b{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:22px;line-height:1}
-  .tally small{font-size:12px;color:var(--steel)}
-  .t-alarm b{color:var(--alarm)} .t-amber b{color:var(--amber)} .t-teal b{color:var(--teal)}
+header{margin-bottom:1.3rem;}
+.eyebrow{
+  font-size:.7rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--accent);
+  font-weight:600;
+}
+h1{
+  font-size:1.5rem;
+  margin:.3rem 0 .3rem;
+  font-weight:650;
+  letter-spacing:-.01em;
+  text-wrap:balance;
+}
+.sub{color:var(--text-dim);font-size:.88rem;max-width:70ch;}
 
-  .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-bottom:16px}
-  .chips{display:flex;border:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--card)}
-  .chip{
-    appearance:none;border:0;background:transparent;cursor:pointer;
-    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
-    color:var(--steel);padding:8px 14px;border-right:1px solid var(--line);
-  }
-  .chip:last-child{border-right:0}
-  .chip[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
-  .chip:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
-  input[type=search]{
-    flex:1;min-width:170px;font-family:inherit;font-size:14px;color:var(--ink);
-    background:var(--card);border:1px solid var(--line);border-radius:2px;padding:8px 12px;
-  }
-  input[type=search]:focus{outline:2px solid var(--teal);outline-offset:-1px}
-  .ghost{
-    appearance:none;background:transparent;border:1px solid var(--line);border-radius:2px;
-    color:var(--steel);cursor:pointer;padding:8px 12px;text-decoration:none;display:inline-block;
-    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
-  }
-  .ghost:hover{border-color:var(--ink);color:var(--ink)}
-  .ghost:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+/* breadcrumb */
+.crumbs{
+  display:flex;
+  align-items:center;
+  gap:.3rem;
+  flex-wrap:wrap;
+  margin:1.1rem 0;
+  font-size:.85rem;
+}
+.crumb{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:.3rem .65rem;
+  cursor:pointer;
+  color:var(--text-dim);
+}
+.crumb:hover{border-color:var(--accent);color:var(--accent);}
+.crumb.current{
+  color:var(--text);
+  font-weight:600;
+  background:var(--accent-soft);
+  border-color:var(--accent);
+  cursor:default;
+}
+.crumb-sep{color:var(--text-dim);opacity:.5;}
 
-  .list{margin-top:22px;display:flex;flex-direction:column;gap:10px}
-  .row{
-    background:var(--card);border:1px solid var(--line);border-left:3px solid var(--steel);
-    border-radius:2px;box-shadow:var(--shadow);padding:16px 18px;
-    display:grid;grid-template-columns:1fr 108px;gap:4px 20px;align-items:start;
-  }
-  .row.is-late{border-left-color:var(--alarm)}
-  .row.is-soon{border-left-color:var(--amber)}
-  .row.is-ok{border-left-color:var(--teal)}
-  .row.is-done{border-left-color:var(--line);opacity:.72}
+.controls{
+  display:flex;
+  gap:.6rem;
+  margin:0 0 1.4rem;
+}
+input[type="search"]{
+  flex:1;
+  max-width:340px;
+  padding:.5rem .8rem;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:var(--surface);
+  color:var(--text);
+  font-size:.85rem;
+}
+input[type="search"]:focus{outline:2px solid var(--accent);outline-offset:1px;}
+.hint{font-size:.78rem;color:var(--text-dim);align-self:center;}
 
-  .code{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:15px;letter-spacing:-.01em}
-  .cust{font-size:12px;color:var(--steel);margin-left:9px;font-weight:500}
-  .title{font-size:15px;margin:3px 0 9px;max-width:60ch}
-  .title.empty{color:var(--steel);font-style:italic}
+/* --- chart --- */
+.chart{overflow-x:auto;padding-bottom:1rem;}
+.level{display:flex;flex-direction:column;align-items:center;}
 
-  .meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-  .tag{
-    font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
-    border:1px solid var(--line);border-radius:2px;padding:2px 7px;color:var(--steel);background:var(--paper);
-  }
-  .tag.solid{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-  .tag.share{border-color:var(--teal);color:var(--teal)}
+.parent-row{display:flex;justify-content:center;margin-bottom:0;}
+.stem{width:2px;height:22px;background:var(--line);}
+.stem.wide-top{margin:0 auto;}
 
-  .count{text-align:right;grid-row:span 3}
-  .days{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:30px;line-height:1;letter-spacing:-.03em;display:block}
-  .days.late{color:var(--alarm)} .days.soon{color:var(--amber)} .days.ok{color:var(--teal)}
-  .days.none{font-size:15px;color:var(--steel)}
-  .days-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;
-    text-transform:uppercase;color:var(--steel);display:block;margin-top:5px}
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:.65rem .85rem;
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+  min-width:230px;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+}
+.card.focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px var(--accent-soft);
+}
+.card.clickable{cursor:pointer;}
+.card.clickable:hover{border-color:var(--accent);}
+.card.clickable:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 
-  .runway{grid-column:1 / -1;margin-top:12px}
-  .track{position:relative;height:3px;background:var(--line);border-radius:2px}
-  .fill{position:absolute;left:0;top:0;bottom:0;background:var(--steel);border-radius:2px}
-  .row.is-late .fill{background:var(--alarm)}
-  .row.is-soon .fill{background:var(--amber)}
-  .row.is-ok   .fill{background:var(--teal)}
-  .pin{position:absolute;top:-3px;width:1px;height:9px;background:var(--ink)}
-  .ends{display:flex;justify-content:space-between;margin-top:5px;
-    font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--steel)}
+.avatar{
+  width:38px;height:38px;border-radius:50%;
+  background:var(--avatar-bg);
+  color:var(--text-dim);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.75rem;font-weight:700;letter-spacing:.02em;
+  flex-shrink:0;
+}
+.card-body{min-width:0;}
+.card-name{font-weight:650;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;}
+.card-role{font-size:.74rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;}
+.card-meta{font-size:.7rem;color:var(--text-dim);font-variant-numeric:tabular-nums;display:flex;gap:.4rem;align-items:center;margin-top:.1rem;}
+.badge{
+  font-size:.62rem;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  padding:.05rem .35rem;
+  border-radius:5px;
+  font-weight:700;
+}
+.badge.primary{background:var(--accent-soft);color:var(--accent);}
+.badge.concurrent{background:var(--mono-bg);color:var(--text-dim);}
+.report-count{
+  margin-left:auto;
+  font-size:.72rem;
+  color:var(--accent);
+  font-weight:700;
+  flex-shrink:0;
+}
+.chevron{color:var(--text-dim);font-size:.9rem;flex-shrink:0;}
 
-  .note{grid-column:1 / -1;margin-top:11px;padding-top:10px;border-top:1px dashed var(--line);
-    font-size:13px;color:var(--steel);white-space:pre-line}
+/* connector tree for children grid */
+.connector{position:relative;width:100%;display:flex;justify-content:center;}
+.connector svg{display:block;overflow:visible;}
 
-  .state{padding:56px 0;text-align:center;color:var(--steel)}
-  .state b{display:block;font-family:'Archivo',sans-serif;font-weight:700;font-size:19px;color:var(--ink);margin-bottom:6px}
+.children-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));
+  gap:.9rem .9rem;
+  max-width:1180px;
+  margin:0 auto;
+}
+.children-wrap{position:relative;padding-top:0;}
 
-  footer{margin-top:26px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--steel);
-    display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.empty-msg{color:var(--text-dim);font-size:.85rem;text-align:center;padding:2rem;}
 
-  .row{cursor:pointer}
-  .row:hover{border-color:var(--ink)}
-  .row:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+/* mode toggle */
+.mode-toggle{display:flex;gap:.4rem;}
+.mode-btn{
+  padding:.5rem .9rem;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text-dim);
+  font-size:.82rem;
+  cursor:pointer;
+}
+.mode-btn[aria-pressed="true"]{
+  background:var(--accent-soft);
+  color:var(--accent);
+  border-color:var(--accent);
+  font-weight:600;
+}
 
-  /* ---------- детальная панель ---------- */
-  .veil{
-    position:fixed;inset:0;background:rgba(19,27,26,.45);z-index:40;
-    display:flex;justify-content:flex-end;
-  }
-  .veil[hidden]{display:none}
-  .panel{
-    width:min(560px,100%);height:100%;background:var(--paper);overflow-y:auto;
-    box-shadow:-8px 0 24px rgba(19,27,26,.12);
-  }
-  .panel-head{
-    position:sticky;top:0;background:var(--paper);border-bottom:1px solid var(--line);
-    padding:20px 24px 16px;z-index:1;
-  }
-  .panel-close{
-    appearance:none;background:transparent;border:1px solid var(--line);border-radius:2px;
-    color:var(--steel);cursor:pointer;padding:6px 10px;font-family:'IBM Plex Mono',monospace;
-    font-size:11px;letter-spacing:.1em;text-transform:uppercase;float:right;
-  }
-  .panel-close:hover{border-color:var(--ink);color:var(--ink)}
-  .panel-code{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:20px}
-  .panel-cust{font-size:13px;color:var(--steel);margin-top:3px}
-  .panel-title{font-size:16px;margin:10px 0 0;max-width:56ch}
+/* full expanded tree */
+.full-tree{display:none;}
+.full-tree.active{display:block;}
+.full-tree details > summary{list-style:none;cursor:pointer;}
+.full-tree details > summary::-webkit-details-marker{display:none;}
+.tnode{margin:0 0 .4rem 1.15rem;position:relative;}
+.tnode::before{
+  content:"";
+  position:absolute;
+  left:-1.05rem;
+  top:1.05rem;
+  width:1rem;
+  height:1px;
+  background:var(--line);
+}
+.full-tree > .tnode::before{display:none;}
+.full-tree > .tnode{margin-left:0;}
+.tnode-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:9px;
+  padding:.5rem .75rem;
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  max-width:520px;
+}
+.tnode-card:hover{border-color:var(--accent);}
+.tchildren{
+  border-left:1px solid var(--line);
+  margin-left:1.05rem;
+  padding-left:0;
+  margin-top:.4rem;
+}
+.tw{display:inline-block;width:.75rem;color:var(--text-dim);font-size:.65rem;transition:transform .12s ease;flex-shrink:0;}
+details[open] > summary .tw{transform:rotate(90deg);}
+.tcount{color:var(--text-dim);font-size:.72rem;margin-left:auto;flex-shrink:0;font-variant-numeric:tabular-nums;}
 
-  .panel-body{padding:20px 24px 40px}
-  .kv-group{margin-bottom:22px}
-  .kv-group-title{
-    font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
-    color:var(--steel);margin:0 0 8px;
-  }
-  .kv{
-    display:grid;grid-template-columns:150px 1fr;gap:2px 14px;
-    border-top:1px solid var(--line);
-  }
-  .kv-row{display:contents}
-  .kv-row dt{
-    padding:9px 0;font-size:12.5px;color:var(--steel);border-bottom:1px solid var(--line);
-  }
-  .kv-row dd{
-    margin:0;padding:9px 0;font-size:13.5px;border-bottom:1px solid var(--line);
-    white-space:pre-line;word-break:break-word;
-  }
-  @media (max-width:620px){
-    .kv{grid-template-columns:120px 1fr}
-    .panel{width:100%}
-  }
+/* search results overlay */
+.search-results{display:none;}
+.search-results.active{display:block;}
+.chart.hidden{display:none;}
+.result-item{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:.6rem .85rem;
+  margin-bottom:.5rem;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+}
+.result-item:hover{border-color:var(--accent);}
+.result-path{font-size:.72rem;color:var(--text-dim);margin-top:.1rem;}
 
-  @media (max-width:620px){
-    h1{font-size:26px}
-    .row{grid-template-columns:1fr;gap:2px}
-    .count{text-align:left;grid-row:auto;margin-top:10px;display:flex;align-items:baseline;gap:8px}
-    .days{font-size:24px} .days-lbl{margin-top:0}
-  }
+.stats{
+  display:flex;gap:1.2rem;margin-top:1rem;flex-wrap:wrap;
+}
+.stat{
+  background:var(--surface);border:1px solid var(--border);border-radius:8px;
+  padding:.5rem .9rem;min-width:100px;
+}
+.stat .n{font-size:1.15rem;font-weight:650;font-variant-numeric:tabular-nums;}
+.stat .l{font-size:.68rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;}
+
+footer{margin-top:2.5rem;color:var(--text-dim);font-size:.76rem;text-align:center;}
+
+@media (max-width: 640px){
+  body{padding:1.1rem .8rem 3rem;}
+  h1{font-size:1.25rem;}
+  .sub{font-size:.82rem;}
+  .stats{gap:.6rem;}
+  .stat{min-width:0;flex:1 1 45%;padding:.45rem .7rem;}
+
+  .controls{flex-direction:column;align-items:stretch;}
+  input[type="search"]{max-width:none;}
+  .mode-toggle{width:100%;}
+  .mode-btn{flex:1;text-align:center;}
+
+  .crumbs{font-size:.78rem;}
+  .crumb{padding:.25rem .5rem;}
+
+  .card{min-width:0;width:100%;padding:.55rem .65rem;flex-wrap:wrap;}
+  .card-name{max-width:150px;}
+  .card-role{max-width:150px;}
+  .avatar{width:32px;height:32px;font-size:.65rem;}
+  .children-grid{grid-template-columns:1fr;max-width:100%;}
+  .report-count{font-size:.66rem;}
+
+  .tnode-card{max-width:none;padding:.45rem .6rem;flex-wrap:wrap;}
+  .full-tree > .tnode{margin-left:0;}
+  .tnode{margin-left:.8rem;}
+  .tnode::before{left:-.75rem;}
+  .tchildren{margin-left:.8rem;}
+  .tcount{width:100%;margin-left:2.15rem;order:5;}
+}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="head-in">
-    <div class="eyebrow">ONM · RFQ and PO</div>
-    <h1>Тендеры Daniil <span id="scope">— в работе</span></h1>
-    <div class="tally" id="tally"></div>
-    <div class="controls">
-      <div class="chips" role="group" aria-label="Фильтр по статусу">
-        <button class="chip" id="f-open" aria-pressed="true">В работе</button>
-        <button class="chip" id="f-all" aria-pressed="false">Все</button>
-      </div>
-      <input type="search" id="q" placeholder="Поиск по номеру, заказчику, позиции" aria-label="Поиск">
-    </div>
-  </div>
-</header>
-
 <div class="wrap">
-  <div class="list" id="list"></div>
-  <div class="state" id="state" style="display:none"></div>
-  <footer>
-    <span id="stamp"></span>
-    <span>Buyer содержит Danil / Daniil · данные обновлены вручную</span>
-  </footer>
-</div>
+  <header>
+    <div class="eyebrow">NCOC · Company Info / Org Chart</div>
+    <h1>Supply Chain Directorate</h1>
+    <p class="sub">Click any card to drill into that person's team — same navigation as the SuccessFactors org chart. Use the breadcrumb or search to jump around.</p>
+    <div class="stats">
+      <div class="stat"><div class="n" id="statTotal">—</div><div class="l">People captured</div></div>
+      <div class="stat"><div class="n" id="statLevels">—</div><div class="l">Levels deep</div></div>
+    </div>
+  </header>
 
-<div class="veil" id="veil" hidden>
-  <div class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-code"></div>
+  <div class="controls">
+    <input type="search" id="search" placeholder="Search name, title, or ID…" aria-label="Search people">
+    <span class="hint" id="hint"></span>
+  </div>
+
+  <div class="crumbs" id="crumbs"></div>
+
+  <div class="chart" id="chart">
+    <div class="level">
+      <div class="parent-row" id="parentRow"></div>
+      <div class="stem" id="stemTop"></div>
+      <div class="connector" id="connectorSvgWrap"></div>
+      <div class="children-wrap">
+        <div class="children-grid" id="childrenGrid"></div>
+      </div>
+    </div>
+    <div class="empty-msg hidden" id="noReports"></div>
+  </div>
+
+  <div class="search-results" id="searchResults"></div>
+
+  <footer>Compiled from on-screen SuccessFactors org chart photos · IDs and headcounts as shown on screen.</footer>
 </div>
 
 <script>
-// ---------- данные ----------
-// Обновление: замените массив ниже на новую выгрузку и пересохраните файл.
-var DATA = [{"num": "272", "customer": "ERG", "rfq": "ERFQ26007", "pr": "", "category": "Поставка подшипников рамочный контракт", "buyer": "Baltabek, Daniil", "status": "MR", "openClosed": "Open", "result": "Market research", "rcvDate": "2026-04-10", "dueDate": "", "mrRcvDate": "", "mrDueDate": "", "comment": "12-06: NB need to clarify!\n04-05: EN pending approval by Yusuf\n10-04: MR received", "contractValue": "", "bidValue": "", "poNumber": "", "full": [["#", "272"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26007"], ["Category", "Поставка подшипников рамочный контракт"], ["Buyer", "Baltabek, Daniil"], ["Short Status", "MR"], ["Open / Closed", "Open"], ["Result", "Market research"], ["Ten Rcv Date", "2026-04-10"], ["Comments (Internal Notes)", "12-06: NB need to clarify!\n04-05: EN pending approval by Yusuf\n10-04: MR received"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "280", "customer": "ERG", "rfq": "ERFQ26012", "pr": "", "category": "Запорная арматура", "buyer": "Danil", "status": "Unquoted", "openClosed": "Closed", "result": "Market research", "rcvDate": "2026-04-16", "dueDate": "2026-04-23", "mrRcvDate": "", "mrDueDate": "", "comment": "16-04: RFQ received", "contractValue": "", "bidValue": "", "poNumber": "", "full": [["#", "280"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26012"], ["Category", "Запорная арматура"], ["Buyer", "Danil"], ["Short Status", "Unquoted"], ["Open / Closed", "Closed"], ["Result", "Market research"], ["Ten Rcv Date", "2026-04-16"], ["Ten Due Date", "2026-04-23"], ["Comments (Internal Notes)", "16-04: RFQ received"]]}, {"num": "281", "customer": "ERG", "rfq": "ERFQ26013", "pr": "", "category": "Компрессор на шасси", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-16", "dueDate": "2026-04-16", "mrRcvDate": "", "mrDueDate": "", "comment": "17-04: EN sent offer\n16-04: RFQ received", "contractValue": "", "bidValue": "34550", "poNumber": "", "full": [["#", "281"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26013"], ["Category", "Компрессор на шасси"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-16"], ["Ten Due Date", "2026-04-16"], ["Comments (Internal Notes)", "17-04: EN sent offer\n16-04: RFQ received"], ["COST Value", "23345"], ["BID Value in USD", "34550"]]}, {"num": "293", "customer": "ERG", "rfq": "ERFQ26022", "pr": "", "category": "запорная арматуры по ЗРА", "buyer": "Danil", "status": "MR", "openClosed": "Closed", "result": "Market research", "rcvDate": "2026-04-20", "dueDate": "2026-04-29", "mrRcvDate": "", "mrDueDate": "", "comment": "12-06: NB no answer from Daniil\n28-04: EN submitted\n25-04: EN asked extension\n20-04: GS RFQ received", "contractValue": "", "bidValue": "0", "poNumber": "", "full": [["#", "293"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26022"], ["Category", "запорная арматуры по ЗРА"], ["Buyer", "Danil"], ["Short Status", "MR"], ["Open / Closed", "Closed"], ["Result", "Market research"], ["Ten Rcv Date", "2026-04-20"], ["Ten Due Date", "2026-04-29"], ["Comments (Internal Notes)", "12-06: NB no answer from Daniil\n28-04: EN submitted\n25-04: EN asked extension\n20-04: GS RFQ received"], ["Quoted Items", "0"], ["Total Items", "74"], ["% Items Quoted", "0"], ["BID Value in USD", "0"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "285", "customer": "ERG", "rfq": "ERFQ26014", "pr": "T/18824/16/04/26", "category": "Запорная арматура", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-17", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "27-04: EN submitted\n25-04: EN asked extension\n16-04: GS RFQ received", "contractValue": "", "bidValue": "", "poNumber": "", "full": [["#", "285"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26014"], ["Customer PR/RFQ", "T/18824/16/04/26"], ["Category", "Запорная арматура"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-17"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "27-04: EN submitted\n25-04: EN asked extension\n16-04: GS RFQ received"], ["Quoted Items", "0"], ["Total Items", "66"], ["% Items Quoted", "0"], ["COST Value", "70497"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "313", "customer": "ERG", "rfq": "ERFQ26028", "pr": "S/02813/23/04/26", "category": "запорная арматура по прочая", "buyer": "Danil", "status": "Contract Draft", "openClosed": "Open", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-28", "mrRcvDate": "", "mrDueDate": "", "comment": "12-06: NB send quotation to ERG Dmitriy.\n21-05 US: contract draft 80k KZT\n06-05: GS нет ML и BID\n28-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "0", "poNumber": "", "full": [["#", "313"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26028"], ["Customer PR/RFQ", "S/02813/23/04/26"], ["Priority", "Critical"], ["Category", "запорная арматура по прочая"], ["Buyer", "Danil"], ["Short Status", "Contract Draft"], ["Open / Closed", "Open"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-28"], ["Days Left", "-101"], ["Comments (Internal Notes)", "12-06: NB send quotation to ERG Dmitriy.\n21-05 US: contract draft 80k KZT\n06-05: GS нет ML и BID\n28-04: EN submitted\n27-04: GS RFQ received"], ["BID Value in USD", "0"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "312", "customer": "ERG", "rfq": "ERFQ26027", "pr": "T/20131/24/04/26", "category": "запорная арматура стальная", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-29", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n29-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "0", "poNumber": "", "full": [["#", "312"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26027"], ["Customer PR/RFQ", "T/20131/24/04/26"], ["Category", "запорная арматура стальная"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-29"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n29-04: EN submitted\n27-04: GS RFQ received"], ["BID Value in USD", "0"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "314", "customer": "ERG", "rfq": "ERFQ26029", "pr": "T/18857/16/04/26", "category": "арматура высокого давления", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "0", "poNumber": "", "full": [["#", "314"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26029"], ["Customer PR/RFQ", "T/18857/16/04/26"], ["Category", "арматура высокого давления"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received"], ["BID Value in USD", "0"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "315", "customer": "ERG", "rfq": "ERFQ26030", "pr": "T/18856/16/04/26", "category": "запорная арматура стальная", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN late to submit a price offer\n27-04: GS RFQ received", "contractValue": "", "bidValue": "0", "poNumber": "", "full": [["#", "315"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26030"], ["Customer PR/RFQ", "T/18856/16/04/26"], ["Category", "запорная арматура стальная"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN late to submit a price offer\n27-04: GS RFQ received"], ["BID Value in USD", "0"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "316", "customer": "ERG", "rfq": "ERFQ26031", "pr": "T/18854/16/04/26", "category": "запорная арматура стальная", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN late to submit a price offer\n27-04: GS RFQ received", "contractValue": "", "bidValue": "0", "poNumber": "", "full": [["#", "316"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26031"], ["Customer PR/RFQ", "T/18854/16/04/26"], ["Category", "запорная арматура стальная"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN late to submit a price offer\n27-04: GS RFQ received"], ["BID Value in USD", "0"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "317", "customer": "ERG", "rfq": "ERFQ26032", "pr": "T/18846/16/04/26", "category": "запорная арматура импортная", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "0", "poNumber": "", "full": [["#", "317"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26032"], ["Customer PR/RFQ", "T/18846/16/04/26"], ["Category", "запорная арматура импортная"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received"], ["BID Value in USD", "0"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "318", "customer": "ERG", "rfq": "ERFQ26033", "pr": "T/18844/16/04/26", "category": "арматура высокого давления", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "0", "poNumber": "", "full": [["#", "318"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26033"], ["Customer PR/RFQ", "T/18844/16/04/26"], ["Category", "арматура высокого давления"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received"], ["BID Value in USD", "0"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "319", "customer": "ERG", "rfq": "ERFQ26034", "pr": "T/18826/16/04/26", "category": "запорная арматура стальная", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "0", "poNumber": "", "full": [["#", "319"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26034"], ["Customer PR/RFQ", "T/18826/16/04/26"], ["Category", "запорная арматура стальная"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received"], ["BID Value in USD", "0"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "320", "customer": "ERG", "rfq": "ERFQ26035", "pr": "T/18824/16/04/26", "category": "запорная арматура стальная", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "48324.09", "poNumber": "", "full": [["#", "320"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26035"], ["Customer PR/RFQ", "T/18824/16/04/26"], ["Category", "запорная арматура стальная"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received"], ["COST Value", "24162.04"], ["BID Value in USD", "48324.09"], ["RFx", "T/18824/16/04/26"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "321", "customer": "ERG", "rfq": "ERFQ26036", "pr": "T/18819/16/04/26", "category": "запорная арматура чугунная", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "164343.4", "poNumber": "", "full": [["#", "321"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26036"], ["Customer PR/RFQ", "T/18819/16/04/26"], ["Category", "запорная арматура чугунная"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received"], ["Quoted Items", "104"], ["Total Items", "104"], ["% Items Quoted", "1"], ["COST Value", "82171.7"], ["BID Value in USD", "164343.4"], ["RFx", "T/18819/16/04/26"], ["KPO Manager - Contact", "Қайырдұлда Рахат Rakhat.Kaiyrdulda@erg.kz"], ["Tel", ".+7 701 7650027"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "322", "customer": "ERG", "rfq": "ERFQ26037", "pr": "T/18804/16/04/26", "category": "запорная арматура стальная", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "187474.89", "poNumber": "", "full": [["#", "322"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26037"], ["Customer PR/RFQ", "T/18804/16/04/26"], ["Category", "запорная арматура стальная"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received"], ["Quoted Items", "86"], ["Total Items", "97"], ["% Items Quoted", "0.89"], ["COST Value", "93737.45"], ["BID Value in USD", "187474.89"], ["RFx", "T/18804/16/04/26"], ["KPO Manager - Contact", "Қайырдұлда Рахат Rakhat.Kaiyrdulda@erg.kz"], ["Tel", ".+7 701 7650027"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "323", "customer": "ERG", "rfq": "ERFQ26038", "pr": "T/18781/16/04/26", "category": "запорная арматура стальная", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "163058.11", "poNumber": "", "full": [["#", "323"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26038"], ["Customer PR/RFQ", "T/18781/16/04/26"], ["Category", "запорная арматура стальная"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN submitted\n27-04: GS RFQ received"], ["Quoted Items", "90"], ["Total Items", "93"], ["% Items Quoted", "0.97"], ["COST Value", "81529.05"], ["BID Value in USD", "163058.11"], ["RFx", "T/18781/16/04/26"], ["KPO Manager - Contact", "Қайырдұлда Рахат Rakhat.Kaiyrdulda@erg.kz"], ["Tel", ".+7 701 7650027"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "324", "customer": "ERG", "rfq": "ERFQ26039", "pr": "T/18778/16/04/26", "category": "запорная арматура импортная", "buyer": "Danil", "status": "Unquoted", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "06-05: GS нет ML и BID\n27-04: EN late to submit a price offer\n27-04: GS RFQ received", "contractValue": "", "bidValue": "0", "poNumber": "", "full": [["#", "324"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26039"], ["Customer PR/RFQ", "T/18778/16/04/26"], ["Category", "запорная арматура импортная"], ["Buyer", "Danil"], ["Short Status", "Unquoted"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "06-05: GS нет ML и BID\n27-04: EN late to submit a price offer\n27-04: GS RFQ received"], ["Quoted Items", "0"], ["Total Items", "12"], ["% Items Quoted", "0"], ["BID Value in USD", "0"], ["RFx", "T/18778/16/04/26"], ["KPO Manager - Contact", "Қайырдұлда Рахат Rakhat.Kaiyrdulda@erg.kz"], ["Tel", ".+7 701 7650027"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "325", "customer": "ERG", "rfq": "ERFQ26040", "pr": "T/18776/16/04/26", "category": "запорная арматура стальная", "buyer": "Danil", "status": "E-BID", "openClosed": "Closed", "result": "Submitted E-BID", "rcvDate": "2026-04-25", "dueDate": "2026-04-27", "mrRcvDate": "", "mrDueDate": "", "comment": "27-04: EN submitted\n27-04: GS RFQ received", "contractValue": "", "bidValue": "429083", "poNumber": "", "full": [["#", "325"], ["Customer", "ERG"], ["ONM RFQ", "ERFQ26040"], ["Customer PR/RFQ", "T/18776/16/04/26"], ["Category", "запорная арматура стальная"], ["Buyer", "Danil"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Submitted E-BID"], ["Ten Rcv Date", "2026-04-25"], ["Ten Due Date", "2026-04-27"], ["Comments (Internal Notes)", "27-04: EN submitted\n27-04: GS RFQ received"], ["Quoted Items", "59"], ["Total Items", "59"], ["% Items Quoted", "1"], ["COST Value", "214541.5"], ["BID Value in USD", "429083"], ["RFx", "T/18776/16/04/26"], ["KPO Manager - Contact", "Қайырдұлда Рахат Rakhat.Kaiyrdulda@erg.kz"], ["Tel", ".+7 701 7650027"], ["P1", "ONM"], ["P2", "-"], ["P3", "-"], ["P4", "-"], ["P5", "-"], ["P6", "-"], ["P7", "-"], ["P8", "-"]]}, {"num": "401", "customer": "KPO", "rfq": "KRFQ1284-49", "pr": "7200009820", "category": "", "buyer": "Amir, Baltabek, Daniil, Aida, Nursultan", "status": "E-BID", "openClosed": "Closed", "result": "Processing E-BID", "rcvDate": "2026-07-24", "dueDate": "2026-07-30", "mrRcvDate": "", "mrDueDate": "", "comment": "24-07: NB RFQ recived", "contractValue": "", "bidValue": "", "poNumber": "", "full": [["#", "401"], ["Customer", "KPO"], ["ONM RFQ", "KRFQ1284-49"], ["Customer PR/RFQ", "7200009820"], ["Priority", "Critical"], ["Buyer", "Amir, Baltabek, Daniil, Aida, Nursultan"], ["Short Status", "E-BID"], ["Open / Closed", "Closed"], ["Result", "Processing E-BID"], ["Ten Rcv Date", "2026-07-24"], ["Ten Due Date", "2026-07-30"], ["Comments (Internal Notes)", "24-07: NB RFQ recived"], ["P2", "STD"]]}, {"num": "407", "customer": "KPO", "rfq": "KRFQ26055", "pr": "KM Group - 26/0416", "category": "", "buyer": "Baltabek, Daniil", "status": "E-BID", "openClosed": "Open", "result": "Processing E-BID", "rcvDate": "2026-08-03", "dueDate": "2026-08-14", "mrRcvDate": "", "mrDueDate": "", "comment": "03-08: GS RFQ recived", "contractValue": "", "bidValue": "", "poNumber": "", "full": [["#", "407"], ["Customer", "KPO"], ["ONM RFQ", "KRFQ26055"], ["Customer PR/RFQ", "KM Group - 26/0416"], ["Buyer", "Baltabek, Daniil"], ["Short Status", "E-BID"], ["Open / Closed", "Open"], ["Result", "Processing E-BID"], ["Ten Rcv Date", "2026-08-03"], ["Ten Due Date", "2026-08-14"], ["Days Left", "7"], ["Comments (Internal Notes)", "03-08: GS RFQ recived"], ["Quoted Items", "0"], ["Total Items", "120"], ["% Items Quoted", "0"]]}, {"num": "408", "customer": "Zhaikmunai LLP", "rfq": "ZRFQ26002", "pr": "2090063", "category": "Задвижка", "buyer": "Daniil", "status": "E-BID", "openClosed": "Open", "result": "Processing E-BID", "rcvDate": "2026-08-06", "dueDate": "2026-08-11", "mrRcvDate": "", "mrDueDate": "", "comment": "06-08:  GS RFQ recived 12,00", "contractValue": "", "bidValue": "", "poNumber": "", "full": [["#", "408"], ["Customer", "Zhaikmunai LLP"], ["ONM RFQ", "ZRFQ26002"], ["Customer PR/RFQ", "2090063"], ["Category", "Задвижка"], ["Buyer", "Daniil"], ["Short Status", "E-BID"], ["Open / Closed", "Open"], ["Result", "Processing E-BID"], ["Ten Rcv Date", "2026-08-06"], ["Ten Due Date", "2026-08-11"], ["Days Left", "4"], ["Comments (Internal Notes)", "06-08:  GS RFQ recived 12,00"], ["Quoted Items", "0"], ["Total Items", "1"], ["% Items Quoted", "0"]]}, {"num": "409", "customer": "Zhaikmunai LLP", "rfq": "ZRFQ26003", "pr": "2089942", "category": "Подшипники SKF, и сервис наборов Atlas Copco", "buyer": "Daniil", "status": "E-BID", "openClosed": "Open", "result": "Processing E-BID", "rcvDate": "2026-08-07", "dueDate": "2026-08-11", "mrRcvDate": "", "mrDueDate": "", "comment": "07-08:  GS RFQ recived 13,00", "contractValue": "", "bidValue": "", "poNumber": "", "full": [["#", "409"], ["Customer", "Zhaikmunai LLP"], ["ONM RFQ", "ZRFQ26003"], ["Customer PR/RFQ", "2089942"], ["Category", "Подшипники SKF, и сервис наборов Atlas Copco"], ["Buyer", "Daniil"], ["Short Status", "E-BID"], ["Open / Closed", "Open"], ["Result", "Processing E-BID"], ["Ten Rcv Date", "2026-08-07"], ["Ten Due Date", "2026-08-11"], ["Comments (Internal Notes)", "07-08:  GS RFQ recived 13,00"], ["Quoted Items", "1"], ["Total Items", "20"], ["% Items Quoted", "0.05"]]}];
+const data = {
+  name:"Giancarlo Ruiu", role:"Managing Director", id:"100001", children:[
+    {name:"Askat Sultashev", role:"Technical Director", id:"107396"},
+    {name:"Assem Sagyndyk", role:"Executive Assistant", id:"179598"},
+    {name:"Francesca Lupo Stanghellini", role:"Strategy & Business Director", id:"108833"},
+    {name:"Grigory Dashkovskiy", role:"Drilling Director", id:"100550"},
+    {name:"Leonardo Zammarano", role:"Supply Chain Director", id:"179308", children:[
+      {name:"Natalya Tsoy", role:"Contracting and Procurement GM (Corporate)", id:"—", children:[
+        {name:"Dina Nazarbayeva", role:"Head of Contracting and Procurement", id:"110408"},
+        {name:"Shynara Yermagambetova", role:"Head of Contracting and Procurement", id:"110419"},
+        {name:"Yerkin Baidildayev", role:"Head of Contracting and Procurement", id:"110419", note:"Concurrent"},
+        {name:"Yerkin Baidildayev", role:"Head of Contracting and Procurement", id:"110375", note:"Primary"},
+      ]},
+      {name:"Olabamiji Funsho Sanusi", role:"Contracting and Procurement GM", id:"—", children:[
+        {name:"Bulat Musrepov", role:"Contracting and Procurement Manager", id:"110432"},
+        {name:"Natalya Shmunk", role:"Contracting and Procurement Manager", id:"110505", children:[
+          {name:"Ainagul Aliyeva", role:"Supply Chain Contracts Specialist", id:"110414"},
+          {name:"Ainur Sultanbek", role:"Supply Chain Contracts Specialist", id:"110439"},
+          {name:"Damir Urazbayev", role:"Supply Chain Contracts Specialist", id:"110446"},
+          {name:"Indira Nurbayeva", role:"Lead Supply Chain Contracts Specialist", id:"110509"},
+          {name:"Kuat Kulmagambetov", role:"Supply Chain Contracts Specialist", id:"110382"},
+          {name:"Nurganym Dyussenova", role:"Supply Chain Contracts Specialist", id:"110378"},
+          {name:"Venera Sultanbekova", role:"Supply Chain Contracts Specialist", id:"110403"},
+          {name:"Zhailan Zhumagaliyeva", role:"Supply Chain Contracts Specialist", id:"110434"},
+        ]},
+        {name:"Talgat Tairovich Ramazanov", role:"Contracting and Procurement Manager", id:"110420", children:[
+          {name:"Ainur Akkenzhina", role:"Supply Chain Contracts Specialist", id:"179384"},
+          {name:"Alima Alagozova", role:"Lead Supply Chain Contracts Specialist", id:"110424"},
+          {name:"Gulzhan Sherkeshbayeva", role:"Lead Supply Chain Contracts Specialist", id:"110398"},
+          {name:"Svetlana Saparova", role:"Supply Chain Contracts Specialist", id:"110460"},
+          {name:"Takhmina Gumarova", role:"Lead Supply Chain Contracts Specialist", id:"110399"},
+          {name:"Zhadyra Yerdeshova", role:"Lead Supply Chain Contracts Specialist", id:"110479"},
+        ]},
+        {name:"Yerlan Issabekov", role:"Contracting and Procurement Manager", id:"110445", children:[
+          {name:"Anargul Timeliyeva", role:"Supply Chain Contracts Specialist", id:"110461"},
+          {name:"Meiramgul Kuzdybayeva", role:"Lead Supply Chain Contracts Specialist", id:"110451"},
+          {name:"Yelaman Baiseitov", role:"Supply Chain Contracts Specialist", id:"110435"},
+          {name:"Yelena Iskra", role:"Lead Supply Chain Contracts Specialist", id:"179390"},
+        ]},
+      ]},
+      {name:"Pawel Janusz Nowacki", role:"Contracting and Procurement GM", id:"—", children:[
+        {name:"Ainur Iklassova", role:"Lead Contracts Board and Stakeholders Specialist", id:"—"},
+        {name:"Albina Kussayeva", role:"Contracts Compliance and Continuous Improvement GM", id:"—", children:[
+          {name:"Aslan Mugalov", role:"Lead Contracts Continuous Improvement Specialist", id:"—"},
+          {name:"Gulzhamila Naukiyeva", role:"Contracts Continuous Improvement Specialist", id:"—"},
+          {name:"Marta Kozhamuratova", role:"Lead Contracts Continuous Improvement Specialist", id:"—"},
+          {name:"Zhanagul Nakpayeva", role:"Lead Contracts Continuous Improvement Specialist", id:"—"},
+        ]},
+        {name:"Madina Stepanyan", role:"Contracts Management Process Manager", id:"179354", children:[
+          {name:"Samal Yessenzhanova", role:"Lead Contracts Management Process Specialist", id:"179454"},
+          {name:"Satybaldy Zholzhanov", role:"Lead Contracts Management Process Specialist", id:"179455"},
+        ]},
+        {name:"Mendygul Uspanova", role:"Lead Contracts Board and Stakeholders Specialist", id:"—"},
+        {name:"Nurlan Primkulov", role:"Vendor Management and Market Intelligence Manager", id:"—", children:[
+          {name:"Aibol Zairbek", role:"Market Intelligence and Benchmarking Specialist", id:"—"},
+          {name:"Anar Kushekova", role:"Vendor Management Specialist", id:"110531"},
+          {name:"Assel Sultanova", role:"Vendor Management Specialist", id:"179612"},
+          {name:"Dariga Mukasheva", role:"Lead Market Intelligence and Benchmarking Specialist", id:"—"},
+          {name:"Dinara Duisenbayeva", role:"Vendor Management Specialist", id:"110428"},
+          {name:"Marta Nakpayeva", role:"Lead Performance Feedback and Due Diligence Specialist", id:"—"},
+          {name:"Meiramgul Karabayeva", role:"Vendor Management Specialist", id:"110519"},
+          {name:"Nurgul Dauletiyarova", role:"Vendor Management Specialist", id:"110531", note:"Concurrent"},
+          {name:"Nurgul Dauletiyarova", role:"Vendor Management Specialist", id:"110481", note:"Primary"},
+          {name:"Tilegen Kassymov", role:"Lead Market Intelligence and Benchmarking Specialist", id:"—", note:"Concurrent"},
+          {name:"Tilegen Kassymov", role:"Market Intelligence and Benchmarking Specialist", id:"—", note:"Primary"},
+          {name:"Zhannur Karimova", role:"Lead Vendor Management Specialist", id:"110516"},
+        ]},
+      ]},
+      {name:"Sandeep Joshi", role:"Contracting and Procurement GM", id:"—", children:[
+        {name:"Darkhan Bakytzhanov", role:"Contracting and Procurement Manager", id:"110525", children:[
+          {name:"Aizhan Rayeva", role:"Lead Supply Chain Contracts Specialist", id:"110510"},
+          {name:"Kaiyrzhan Sherkeshbayev", role:"Supply Chain Contracts Specialist", id:"110500"},
+          {name:"Muldir Jakupova", role:"Supply Chain Contracts Specialist", id:"110529"},
+          {name:"Raushan Mendaliyeva", role:"Supply Chain Contracts Specialist", id:"110496"},
+        ]},
+        {name:"Diana Kenzhebekkyzy", role:"Contracting and Procurement Manager", id:"110508", children:[
+          {name:"Aliya Kenzhegaliyeva", role:"Supply Chain Contracts Specialist", id:"110499"},
+          {name:"Artur Arutyunyan", role:"Supply Chain Contracts Specialist", id:"110376"},
+          {name:"Bolatbek Atanov", role:"Supply Chain Contracts Specialist", id:"110501"},
+          {name:"Kuralay Tishbayeva", role:"Lead Supply Chain Contracts Specialist", id:"110456"},
+          {name:"Nagima Metenova", role:"Lead Supply Chain Contracts Specialist", id:"110498"},
+          {name:"Nurzhan Tokzhumanov", role:"Supply Chain Contracts Specialist", id:"110528"},
+          {name:"Saida Kulbarakova", role:"Supply Chain Contracts Specialist", id:"110497"},
+          {name:"Tatyana Gulchuk", role:"Lead Supply Chain Contracts Specialist", id:"110504"},
+        ]},
+      ]},
+      {name:"Zharas Zhanburshin", role:"Contracting and Procurement GM (Supply)", id:"—", children:[
+        {name:"Aliya Serbakova", role:"Head of Freight Forwarding and Customs Clearing", id:"—", children:[
+          {name:"Aina Zharylgapova", role:"Certification Specialist", id:"110487"},
+          {name:"Aliya Kartbayeva", role:"Customs Operation Specialist", id:"179461"},
+          {name:"Altyngul Yerekenova", role:"Lead Shipping and Customs Specialist", id:"110486"},
+          {name:"Anuar Kubayev", role:"Lead Expediting Specialist", id:"110389"},
+          {name:"Assylbek Khadissov", role:"Shipping Specialist", id:"110489"},
+          {name:"Dina Bissekenova", role:"Certification Specialist", id:"110413"},
+          {name:"Lyailya Sharipova", role:"Customs Operation Specialist", id:"110374"},
+          {name:"Meiram Nigmetov", role:"Lead Certification Specialist", id:"110488"},
+          {name:"Nazgul Orzhanova", role:"Materials Expediting Specialist", id:"110412"},
+          {name:"Nurzhan Kenzhalin", role:"Shipping Specialist", id:"110478"},
+        ]},
+        {name:"Askhat Abdulov", role:"Head of Contracting and Procurement", id:"179824", children:[
+          {name:"Aigul Alibekkyzy", role:"Supply Chain Contracts Specialist", id:"110465"},
+          {name:"Ainur Bissengaliyeva", role:"Supply Chain Contracts Specialist", id:"110442"},
+          {name:"Alisher Jilkaidarov", role:"Supply Chain Contracts Specialist", id:"110470"},
+          {name:"Aliya Kidirbayeva", role:"Supply Chain Contracts Specialist", id:"110532"},
+          {name:"Assel Imasheva", role:"Supply Chain Contracts Specialist", id:"110441"},
+          {name:"Balzhan Tulegenova", role:"Lead Supply Chain Contracts Specialist", id:"110400"},
+          {name:"Diyar Shyngbayev", role:"Supply Chain Contracts Specialist", id:"110454"},
+          {name:"Dmitriy Plotnikov", role:"Lead Supply Chain Contracts Specialist", id:"110369"},
+          {name:"Rauan Kalyshpek", role:"Supply Chain Contracts Specialist", id:"110533"},
+          {name:"Sayagul Berdenova", role:"Supply Chain Contracts Specialist", id:"179425"},
+          {name:"Shuga Karimova", role:"Supply Chain Contracts Specialist", id:"110469"},
+          {name:"Yelena Khan", role:"Supply Chain Contracts Specialist", id:"110440"},
+          {name:"Yerlan Salikhov", role:"Lead Supply Chain Contracts Specialist", id:"110466"},
+          {name:"Zhanat Jumatova", role:"Supply Chain Contracts Specialist", id:"110450"},
+          {name:"Zhenis Bekmagambetov", role:"Supply Chain Contracts Specialist", id:"110468"},
+        ]},
+        {name:"Assel Ulusoy", role:"Head of Materials and Inventory Management", id:"—", children:[
+          {name:"Adilet Satkanov", role:"Stock Control Specialist", id:"110436"},
+          {name:"Aigul Zhunusbekova", role:"Stock Control Specialist", id:"110437"},
+          {name:"Nurberik Ospanov", role:"Stock Control Specialist", id:"110438"},
+        ]},
+        {name:"Marina Issabekova", role:"Contracting and Procurement Manager", id:"110421"},
+      ]},
+      {name:"Saya Aitkuzhina", role:"Department Assistant", id:"179734"},
+    ]},
+    {name:"Maria Dimos", role:"New Developments Director", id:"108627"},
+    {name:"Meiram Shldenov", role:"Production Operations Director", id:"100546"},
+    {name:"Murat Mukashev", role:"HR Director", id:"100800"},
+    {name:"Nurzhan Anuarbek", role:"Legal Director", id:"108820"},
+    {name:"Romke Noordhuis", role:"Finance Director", id:"107596"},
+    {name:"Trevor Frank Runge", role:"Strategic Interface Manager (Chemical)", id:"179276"},
+    {name:"Ualikhan Zhanaissov", role:"HSE Director", id:"—"},
+    {name:"Zhandos Orazaliyev", role:"Deputy Managing Director", id:"107505"},
+  ]
+};
 
-var MODE = 'open', DAY = 86400000;
+// index every node by a stable path (array of indices) & build flat list with parent chain
+function initials(name){
+  return name.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+}
+function countDescendants(node){
+  if(!node.children) return 0;
+  let n = node.children.length;
+  node.children.forEach(c=>n+=countDescendants(c));
+  return n;
+}
+function maxDepth(node){
+  if(!node.children || !node.children.length) return 1;
+  return 1 + Math.max(...node.children.map(maxDepth));
+}
+const flatIndex = []; // {node, path:[node,...ancestors incl self]}
+(function walk(node, path){
+  const p = [...path, node];
+  flatIndex.push({node, path:p});
+  (node.children||[]).forEach(c=>walk(c,p));
+})(data, []);
 
-function parseDate(s){
-  if(!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
-  var p = s.split('-');
-  return new Date(+p[0], +p[1]-1, +p[2]);
-}
-function today0(){ var d = new Date(); d.setHours(0,0,0,0); return d; }
-function daysLeft(r){
-  var d = parseDate(r.dueDate) || parseDate(r.mrDueDate);
-  return d ? Math.round((d - today0()) / DAY) : null;
-}
-function isOpen(r){ return String(r.openClosed).trim().toLowerCase() === 'open'; }
-function tone(r){
-  if(!isOpen(r)) return 'done';
-  var d = daysLeft(r);
-  if(d === null) return 'ok';
-  if(d < 0) return 'late';
-  if(d <= 7) return 'soon';
-  return 'ok';
-}
-function fmt(s){
-  var d = parseDate(s);
-  if(!d) return '—';
-  return ('0'+d.getDate()).slice(-2) + '.' + ('0'+(d.getMonth()+1)).slice(-2) + '.' + d.getFullYear();
-}
-function escapeHtml(s){
-  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
-    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
-  });
-}
-function plural(n, a, b, c){
-  var m = Math.abs(n) % 100, k = m % 10;
-  if(m > 10 && m < 20) return c;
-  if(k > 1 && k < 5) return b;
-  if(k === 1) return a;
-  return c;
-}
+document.getElementById('statTotal').textContent = flatIndex.length;
+document.getElementById('statLevels').textContent = maxDepth(data);
+
+let currentPath = [data]; // array of ancestor nodes, last = focused
 
 function render(){
-  var q = document.getElementById('q').value.trim().toLowerCase();
-  var rows = DATA.map(function(r, i){ return {r:r, i:i}; }).filter(function(x){
-    var r = x.r;
-    if(MODE === 'open' && !isOpen(r)) return false;
-    if(!q) return true;
-    return [r.rfq, r.customer, r.category, r.pr, r.status, r.result, r.num]
-      .join(' ').toLowerCase().indexOf(q) > -1;
+  const focus = currentPath[currentPath.length-1];
+  renderCrumbs();
+  document.getElementById('chart').classList.remove('hidden');
+  document.getElementById('searchResults').classList.remove('active');
+
+  const parentRow = document.getElementById('parentRow');
+  parentRow.innerHTML = '';
+  parentRow.appendChild(makeCard(focus, {big:true, clickable:false}));
+
+  const kids = focus.children || [];
+  document.getElementById('stemTop').style.display = kids.length ? 'block' : 'none';
+
+  const grid = document.getElementById('childrenGrid');
+  grid.innerHTML = '';
+  const noReports = document.getElementById('noReports');
+
+  if(!kids.length){
+    noReports.textContent = focus.name + ' has no direct reports captured.';
+    noReports.classList.remove('hidden');
+  } else {
+    noReports.classList.add('hidden');
+    kids.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(child=>{
+      grid.appendChild(makeCard(child, {big:false, clickable:!!(child.children&&child.children.length)}));
+    });
+  }
+}
+
+function makeCard(node, opts){
+  const card = document.createElement('div');
+  card.className = 'card' + (opts.big ? ' focus' : '') + (opts.clickable ? ' clickable' : '');
+  if(opts.clickable){
+    card.tabIndex = 0;
+    card.addEventListener('click', ()=>{ currentPath.push(node); render(); window.scrollTo({top:0,behavior:'smooth'}); });
+    card.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); card.click(); }});
+  }
+  const av = document.createElement('div');
+  av.className = 'avatar';
+  av.textContent = initials(node.name);
+  card.appendChild(av);
+
+  const body = document.createElement('div');
+  body.className = 'card-body';
+  const nm = document.createElement('div');
+  nm.className = 'card-name';
+  nm.textContent = node.name;
+  body.appendChild(nm);
+  const rl = document.createElement('div');
+  rl.className = 'card-role';
+  rl.textContent = node.role;
+  body.appendChild(rl);
+  const meta = document.createElement('div');
+  meta.className = 'card-meta';
+  meta.innerHTML = `<span>${node.id}</span>`;
+  if(node.note){
+    const b = document.createElement('span');
+    b.className = 'badge ' + (node.note==='Primary'?'primary':'concurrent');
+    b.textContent = node.note;
+    meta.appendChild(b);
+  }
+  body.appendChild(meta);
+  card.appendChild(body);
+
+  if(node.children && node.children.length){
+    const rc = document.createElement('span');
+    rc.className = opts.big ? 'report-count' : 'chevron';
+    rc.textContent = opts.big ? (countDescendants(node)+' in org') : '›';
+    card.appendChild(rc);
+  }
+  return card;
+}
+
+function renderCrumbs(){
+  const el = document.getElementById('crumbs');
+  el.innerHTML = '';
+  currentPath.forEach((node, i)=>{
+    if(i>0){
+      const sep = document.createElement('span');
+      sep.className = 'crumb-sep';
+      sep.textContent = '/';
+      el.appendChild(sep);
+    }
+    const c = document.createElement('span');
+    c.className = 'crumb' + (i===currentPath.length-1 ? ' current' : '');
+    c.textContent = node.name;
+    if(i!==currentPath.length-1){
+      c.addEventListener('click', ()=>{ currentPath = currentPath.slice(0,i+1); render(); window.scrollTo({top:0,behavior:'smooth'}); });
+    }
+    el.appendChild(c);
   });
+}
 
-  rows.sort(function(x,y){
-    var a = x.r, b = y.r;
-    var oa = isOpen(a) ? 0 : 1, ob = isOpen(b) ? 0 : 1;
-    if(oa !== ob) return oa - ob;
-    var da = daysLeft(a), db = daysLeft(b);
-    if(da === null && db === null) return 0;
-    if(da === null) return 1;
-    if(db === null) return -1;
-    return da - db;
-  });
-
-  var open = DATA.filter(isOpen);
-  var late = open.filter(function(r){ var d = daysLeft(r); return d !== null && d < 0; }).length;
-  var soon = open.filter(function(r){ var d = daysLeft(r); return d !== null && d >= 0 && d <= 7; }).length;
-  document.getElementById('tally').innerHTML =
-    tile('t-teal', open.length, plural(open.length,'тендер','тендера','тендеров') + ' в работе') +
-    tile('t-amber', soon, 'срок в ближайшую неделю') +
-    tile('t-alarm', late, plural(late,'срок просрочен','срока просрочено','сроков просрочено')) +
-    tile('', DATA.length, 'всего за всё время');
-
-  document.getElementById('scope').textContent = MODE === 'open' ? '— в работе' : '— все';
-
-  var list = document.getElementById('list');
-  var state = document.getElementById('state');
-
-  if(!rows.length){
-    list.innerHTML = '';
-    state.style.display = 'block';
-    state.innerHTML = q
-      ? '<b>Ничего не нашлось</b>Попробуйте другой номер RFQ или заказчика'
-      : '<b>Открытых тендеров нет</b>Переключитесь на «Все», чтобы увидеть закрытые';
+// search
+const search = document.getElementById('search');
+const hint = document.getElementById('hint');
+search.addEventListener('input', ()=>{
+  const q = search.value.trim().toLowerCase();
+  const resultsEl = document.getElementById('searchResults');
+  if(!q){
+    resultsEl.classList.remove('active');
+    document.getElementById('chart').classList.remove('hidden');
+    hint.textContent = '';
     return;
   }
-  state.style.display = 'none';
-  list.innerHTML = rows.map(function(x){ return card(x.r, x.i); }).join('');
-}
-
-function tile(cls, n, label){
-  return '<div class="' + cls + '"><b>' + n + '</b><small>' + label + '</small></div>';
-}
-
-function card(r, idx){
-  var t = tone(r), d = daysLeft(r);
-  var num, lbl;
-  if(d === null){ num = '<span class="days none">без срока</span>'; lbl = ''; }
-  else {
-    num = '<span class="days ' + t + '">' + (d < 0 ? d : '+' + d) + '</span>';
-    lbl = '<span class="days-lbl">' + (d < 0 ? 'просрочен' : plural(d,'день','дня','дней')) + '</span>';
+  document.getElementById('chart').classList.add('hidden');
+  resultsEl.classList.add('active');
+  const matches = flatIndex.filter(e => (e.node.name+' '+e.node.role+' '+e.node.id).toLowerCase().includes(q)).slice(0,40);
+  hint.textContent = matches.length + ' match' + (matches.length===1?'':'es');
+  resultsEl.innerHTML = '';
+  if(!matches.length){
+    resultsEl.innerHTML = '<div class="empty-msg">No matches.</div>';
+    return;
   }
-
-  var tags = [];
-  if(r.status) tags.push('<span class="tag solid">' + escapeHtml(r.status) + '</span>');
-  if(r.result) tags.push('<span class="tag">' + escapeHtml(r.result) + '</span>');
-  if(/[,\/;]/.test(r.buyer)) tags.push('<span class="tag share">с ' +
-    escapeHtml(r.buyer.split(/[,\/;]/).map(function(s){return s.trim()})
-      .filter(function(s){ return !/^dani?il$/i.test(s) && s; }).join(', ')) + '</span>');
-  if(r.pr) tags.push('<span class="tag">' + escapeHtml(r.pr) + '</span>');
-  if(r.bidValue && +r.bidValue > 0)
-    tags.push('<span class="tag">BID ' + Math.round(+r.bidValue).toLocaleString('ru-RU') + ' $</span>');
-
-  var last = String(r.comment || '').split('\n')[0].trim();
-
-  return '<article class="row is-' + t + '" tabindex="0" role="button" ' +
-    'aria-label="Открыть детали ' + escapeHtml(r.rfq || '') + '" data-idx="' + idx + '">' +
-    '<div>' +
-      '<span class="code">' + escapeHtml(r.rfq || '—') + '</span>' +
-      '<span class="cust">' + escapeHtml(r.customer) + '</span>' +
-      '<div class="title' + (r.category ? '' : ' empty') + '">' +
-        escapeHtml(r.category || 'позиция не указана') + '</div>' +
-      '<div class="meta">' + tags.join('') + '</div>' +
-    '</div>' +
-    '<div class="count">' + num + lbl + '</div>' +
-    runway(r) +
-    (last ? '<div class="note">' + escapeHtml(last) + '</div>' : '') +
-  '</article>';
-}
-
-// ---------- детальная панель ----------
-// группировка полей исходной таблицы по смыслу для читаемого вида
-var FIELD_GROUPS = [
-  ['Заявка', ['#','Customer','ONM RFQ','Customer PR/RFQ','Category','Priority','TA','PR (Yes / No)','Buyer']],
-  ['Статус', ['Short Status','Open / Closed','Result','Days Left','Номер События','RFx']],
-  ['Тендер', ['Ten Rcv Date','Ten Due Date','Clar Rcv Date','Clar Due Date','No','Validity Days','Expiration Date']],
-  ['Маркет-ресёрч', ['MR Rcv Date','MR Due Date','Acknow MR']],
-  ['Контракт', ['Contract Signed Date','Contract end date','Lost/Cancelled Date','Contract Quoted Items','Есть цены']],
-  ['Позиции и цены', ['Quoted Items','Total Items','% Items Quoted','Datasheets','TB']],
-  ['Суммы', ['Contract Value','COST Value','BID Value in USD']],
-  ['Документы', ['Customer PO/Contract No','ONM PO No','Acknow ITT','Rcv Date']],
-  ['Контакты KPO', ['KPO Manager','KPO Manager - Contact','Tel']],
-  ['Участники', ['P1','P2','P3','P4','P5','P6','P7','P8']],
-];
-
-function openDetail(idx){
-  var r = DATA[idx];
-  if(!r) return;
-  var map = {};
-  (r.full || []).forEach(function(pair){ map[pair[0]] = pair[1]; });
-  var used = {};
-
-  var groupsHtml = FIELD_GROUPS.map(function(g){
-    var rows = g[1].filter(function(k){ return map[k] !== undefined; });
-    if(!rows.length) return '';
-    rows.forEach(function(k){ used[k] = true; });
-    return '<div class="kv-group"><div class="kv-group-title">' + escapeHtml(g[0]) + '</div>' +
-      '<dl class="kv">' + rows.map(function(k){
-        return '<div class="kv-row"><dt>' + escapeHtml(k) + '</dt><dd>' + escapeHtml(map[k]) + '</dd></div>';
-      }).join('') + '</dl></div>';
-  }).join('');
-
-  var leftover = Object.keys(map).filter(function(k){ return !used[k]; });
-  if(leftover.length){
-    groupsHtml += '<div class="kv-group"><div class="kv-group-title">Прочее</div><dl class="kv">' +
-      leftover.map(function(k){
-        return '<div class="kv-row"><dt>' + escapeHtml(k) + '</dt><dd>' + escapeHtml(map[k]) + '</dd></div>';
-      }).join('') + '</dl></div>';
-  }
-
-  document.getElementById('panel').innerHTML =
-    '<div class="panel-head">' +
-      '<button class="panel-close" id="panel-close">Закрыть</button>' +
-      '<div class="panel-code" id="panel-code">' + escapeHtml(r.rfq || 'Без номера') + '</div>' +
-      '<div class="panel-cust">' + escapeHtml(r.customer || '') + '</div>' +
-      (r.category ? '<div class="panel-title">' + escapeHtml(r.category) + '</div>' : '') +
-    '</div>' +
-    '<div class="panel-body">' + groupsHtml + '</div>';
-
-  document.getElementById('veil').hidden = false;
-  document.getElementById('panel-close').onclick = closeDetail;
-  document.body.style.overflow = 'hidden';
-}
-
-function closeDetail(){
-  document.getElementById('veil').hidden = true;
-  document.body.style.overflow = '';
-}
-
-document.getElementById('veil').addEventListener('click', function(e){
-  if(e.target.id === 'veil') closeDetail();
-});
-document.addEventListener('keydown', function(e){
-  if(e.key === 'Escape') closeDetail();
-});
-document.getElementById('list').addEventListener('click', function(e){
-  var row = e.target.closest('.row');
-  if(row) openDetail(+row.dataset.idx);
-});
-document.getElementById('list').addEventListener('keydown', function(e){
-  if(e.key !== 'Enter' && e.key !== ' ') return;
-  var row = e.target.closest('.row');
-  if(row){ e.preventDefault(); openDetail(+row.dataset.idx); }
+  matches.forEach(m=>{
+    const item = document.createElement('div');
+    item.className = 'result-item';
+    const av = document.createElement('div');
+    av.className = 'avatar';
+    av.textContent = initials(m.node.name);
+    item.appendChild(av);
+    const body = document.createElement('div');
+    const chain = m.path.slice(0,-1).map(n=>n.name).join(' › ') || 'Top';
+    body.innerHTML = `<div class="card-name">${m.node.name}</div><div class="card-role">${m.node.role} · <span style="font-variant-numeric:tabular-nums">${m.node.id}</span></div><div class="result-path">${chain}</div>`;
+    item.appendChild(body);
+    item.addEventListener('click', ()=>{
+      search.value = '';
+      resultsEl.classList.remove('active');
+      currentPath = m.path.slice(0, -1).length ? m.path.slice(0,-1) : [data];
+      if(m.node.children && m.node.children.length){ currentPath = m.path; }
+      render();
+      document.getElementById('chart').classList.remove('hidden');
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+    resultsEl.appendChild(item);
+  });
 });
 
-function runway(r){
-  var a = parseDate(r.rcvDate) || parseDate(r.mrRcvDate);
-  var b = parseDate(r.dueDate) || parseDate(r.mrDueDate);
-  if(!a || !b || b <= a) return '';
-  var now = today0();
-  var pct = Math.max(0, Math.min(100, (now - a) / (b - a) * 100));
-  return '<div class="runway">' +
-    '<div class="track"><div class="fill" style="width:' + pct.toFixed(1) + '%"></div>' +
-      '<div class="pin" style="left:' + pct.toFixed(1) + '%"></div></div>' +
-    '<div class="ends"><span>получен ' + fmt(r.rcvDate || r.mrRcvDate) + '</span>' +
-      '<span>срок ' + fmt(r.dueDate || r.mrDueDate) + '</span></div>' +
-  '</div>';
-}
-
-document.getElementById('f-open').onclick = function(){ setMode('open'); };
-document.getElementById('f-all').onclick  = function(){ setMode('all'); };
-function setMode(m){
-  MODE = m;
-  document.getElementById('f-open').setAttribute('aria-pressed', m === 'open');
-  document.getElementById('f-all').setAttribute('aria-pressed', m === 'all');
-  render();
-}
-document.getElementById('q').oninput = render;
-
-document.getElementById('stamp').textContent =
-  'Данные по состоянию на ' + new Date().toLocaleDateString('ru-RU');
 render();
 </script>
 </body>
